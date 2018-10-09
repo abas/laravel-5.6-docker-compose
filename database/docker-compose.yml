@@ -1,0 +1,58 @@
+#
+#                    ##        .
+#              ## ## ##       ==
+#           ## ## ## ##      ===
+#       /""""""""""""""""\___/ ===
+#  ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
+#       \______ o          __/
+#         \    \        __/
+#          \____\______/
+#
+#          |          |
+#       __ |  __   __ | _  __   _
+#      /  \| /  \ /   |/  / _\ |
+#      \__/| \__/ \__ |\_ \__  |
+#
+
+version: "3"
+
+networks:
+  {net_service}: #nama alias, untuk internal network docker-compose
+    external:
+      name: {net_external} #salah satu network docker, dengan driver bridge
+
+volumes:
+  dbdata:
+    driver: local
+
+services:
+# Database Container
+  database:
+    image: mysql:5.7
+    container_name: database
+    volumes:
+      - dbdata:/var/lib/mysql
+    ports:
+      - "13306:3306"
+    networks:
+      - ulala
+    environment:
+      - "MYSQL_DATABASE={DB_NAME}"
+      - "MYSQL_USER={DB_USER}"
+      - "MYSQL_PASSWORD={DB_PASS}"
+      - "MYSQL_ROOT_PASSWORD={DB_ROOT_PASS}"
+
+# Dashboard DB Container
+  dashboard: 
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin2
+    ports:
+      - "18080:80"
+    networks:
+      - {net_service}
+    links:
+      - database:database
+    #external_links:
+      #- CONTAINER:ALIAS
+    environment:
+      - "PMA_HOST=database"
